@@ -39,6 +39,8 @@ class SplitTokensTest(unittest.TestCase):
         ("BLUBB '(DA BLAH)'", ['BLUBB', "(DA BLAH)"]),
         ("BLUBB 'BLAH \"DA\" BLUBB'", ['BLUBB', 'BLAH \"DA\" BLUBB']),
         ("BLUBB\t'DA\tBLUB'", ['BLUBB', "DA\tBLUB"]),
+        ("BLUBB (()('((DA) BLAH)'))",
+         ['BLUBB', "(", "(", ")", "(", "((DA) BLAH)", ")", ")"]),
     ]
 
     maxDiff = None
