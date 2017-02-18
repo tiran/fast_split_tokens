@@ -11,7 +11,10 @@ Input:
 Output:
 ["(", "2.5.20.1", "NAME", "subschema", "AUXILIARY", "MAY", "(", "dITStructureRules", "nameForms", "dITContentRules", "objectClasses", "attributeTypes", "matchingRules", "matchingRuleUse", ")", "X-ORIGIN", "(", "RFC 4512", "user defined", ")", ")"]
 
-Christian Heimes <christian@python.org>
+The attached patch file is derived from python-ldap module. All of the
+modifications to python-ldap module represented in the following patch(es)
+were developed by Christian Heimes <christian@python.org>. I have not
+assigned rights and/or interest in this work to any party.
 """
 import re
 
@@ -30,7 +33,7 @@ tokens_findall = re.compile(
 ).findall
 
 
-def fast_split_tokens(s, ignored=None):
+def fast_split_tokens(s, keywordDict):
     parts = []
     parens = 0
     for opar, cpar, unquoted, quoted, residue in tokens_findall(s):
@@ -52,4 +55,5 @@ def fast_split_tokens(s, ignored=None):
 
     if parens:
         raise ValueError("Unbalanced parenthesis in '{}'".format(s))
+
     return parts
