@@ -16,21 +16,40 @@ Christian Heimes <christian@python.org>
 import re
 
 tokens_findall = re.compile(
-    r"[()]"         # "(" or ")" as single token
-    r"|"            # or
-    r"[^'$()\s]+"   # string of length >= 1 without '$() or whitespace
-    r"|"            # or
-    r"'.*?'"        # any string or empty string surrounded by single quotes
-    r"(?!\w)",      # except if right quote is succeeded by alphanumeric char
+    r"(\()"           # opening parenthesis
+    r"|"              # or
+    r"(\))"           # closing parenthesis
+    r"|"              # or
+    r"([^'$()\s]+)"   # string of length >= 1 without '$() or whitespace
+    r"|"              # or
+    r"('.*?'(?!\w))"  # any string or empty string surrounded by single quotes
+                      # except if right quote is succeeded by alphanumeric char
+    r"|"              # or
+    r"([^\s]+?)",     # residue, all non-whitespace strings
     re.UNICODE
 ).findall
 
 
 def fast_split_tokens(s, ignored=None):
     parts = []
-    for part in tokens_findall(s):
-        # If it starts with a quote, it must end with a quote.
-        if part and part[0] == "'":
-            part = part[1:-1]
-        parts.append(part)
+    parens = 0
+    for opar, cpar, unquoted, quoted, residue in tokens_findall(s):
+        if unquoted:
+            parts.append(unquoted)
+        elif quoted:
+            parts.append(quoted[1:-1])
+        elif opar:
+            parens += 1
+            parts.append(opar)
+        elif cpar:
+            parens -= 1
+            parts.append(cpar)
+        elif residue == '$':
+            if not parens:
+                raise ValueError("'$' outside parenthesis", s)
+        else:
+            raise ValueError(residue, s)
+
+    if parens:
+        raise ValueError("Unbalanced parenthesis in '{}'".format(s))
     return parts
