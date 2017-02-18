@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 from __future__ import print_function
 
@@ -38,13 +39,25 @@ class SplitTokensTest(unittest.TestCase):
         ("BLUBB '(DA)'", ['BLUBB', "(DA)"]),
         ("BLUBB '(DA BLAH)'", ['BLUBB', "(DA BLAH)"]),
         ("BLUBB 'BLAH \"DA\" BLUBB'", ['BLUBB', 'BLAH \"DA\" BLUBB']),
-        ("BLUBB\t'DA\tBLUB'", ['BLUBB', "DA\tBLUB"]),
         ("BLUBB (()('((DA) BLAH)'))",
          ['BLUBB', "(", "(", ")", "(", "((DA) BLAH)", ")", ")"]),
+
+    ]
+
+    extra_testcases = [
+        # tab
+        ("BLUBB\t'DA\tBLUB'", ['BLUBB', "DA\tBLUB"]),
+        # unicode
+        (u"BLUBB 'DÄ BLÜBB'", ['BLUBB', u"DÄ BLÜBB"]),
+        # for Oracle
+        ("BLUBBER DI 'BLU'BB ER' DA 'BLAH' ",
+         ["BLUBBER", "DI", "BLU'BB ER", "DA", "BLAH"]),
+        # ("BLUBB DI 'BLU B B ER'MUST 'BLAH' ",
+        #  ['BLUBB', 'DI', 'BLU B B ER', 'MUST', 'BLAH'])
     ]
 
     maxDiff = None
-    loops = 10
+    loops = 1
 
     @classmethod
     def setUpClass(cls):
@@ -58,16 +71,13 @@ class SplitTokensTest(unittest.TestCase):
         for i in range(self.loops):
             for case, expected in self.testcases:
                 result = split_tokens(case, {})
-                # XXX split_token() doesn't consider \t white space
-                if '\t' in case:
-                    continue
                 self.assertEqual(expected, result)
         print(time.time() - start)
 
     def test_fast_split_tokens(self):
         start = time.time()
         for i in range(self.loops):
-            for case, expected in self.testcases:
+            for case, expected in self.testcases + self.extra_testcases:
                 result = fast_split_tokens(case, {})
                 if expected != result:
                     print(case)
