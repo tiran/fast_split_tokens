@@ -15,9 +15,12 @@ Christian Heimes <christian@python.org>
 """
 import re
 
-# either any string that does not contain $, single quote or white space
-# or any string that starts and ends with a single quote (non-greedy match)
-tokens_findall = re.compile(r"[^'$\s]+|'.+?'").findall
+# either one of:
+# * "(" or ")" as single token
+# * any string of length >= 1 that does not contain "$", "(", ")",
+#   "'" (single quote), or white space
+# * any string (including empty string) that starts and ends with "'"
+tokens_findall = re.compile(r"[()]|[^'$\s()]+|'.*?'").findall
 
 
 def fast_split_tokens(s, ignored=None):
